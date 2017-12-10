@@ -8,9 +8,5 @@ fizzBuzz n
     | n `mod` 15 == 0 = "FizzBuzz"
     | otherwise       = show n
 
-loopFB :: [Integer] -> String
-loopFB []     = "Nothing"
-loopFB (x:xs) = fizzBuzz x
-
 main = do
-    print $ loopFB fizzRange
+    print $ map fizzBuzz(fizzRange)
