@@ -3,7 +3,8 @@ import Data.Random
 
 data Choice = Rock 
            | Paper 
-           | Scissors 
+           | Scissors
+           | Error
   deriving Show
 
 associate :: String -> Choice
@@ -11,18 +12,32 @@ associate s = case s of
     "1" -> Rock
     "2" -> Paper
     "3" -> Scissors
+    _   -> Error
+
+compareResults :: (Choice, Choice) -> String
+compareResults (pc, cc) = case (pc, cc) of
+    (Rock, Rock)      -> "It's a tie!"
+    (Rock, Paper)     -> "You lose!"
+    (Rock, Scissors)  -> "You win!"
+    (Paper, Rock)     -> "You win!"
+    (Paper, Paper)    -> "It's a tie!"
+    (Paper, Scissors) -> "You lose!"
+    (Scissors, Rock)  -> "You lose!"
+    (Scissors, Paper) -> "You win!"
+    (Scissors, Scissors) -> "It's a tie!"
+    (Error, _ )          -> "Error"
 
 main = do
-    print "Hit 1: Rock, 2: Paper, 3: Scissors"
+    print "Choose 1: Rock, 2: Paper, 3: Scissors"
+    -- player's choice
     choice <- getLine
-    -- Ask again if choice is not either 1, 2 or 3
-    
-    -- Print the player's choice
-    --putStrLn $ "You chose " ++ choice ++ "!"
-
-    -- computer choice
+    -- computer's choice
     compChoice <- sample $ randomElement  ["1", "2", "3"]
-    print $ associate choice
-    print $ associate compChoice
-
-
+    -- associate choices
+    let pc = associate choice
+    let cc = associate compChoice
+    -- print both choices
+    print $ pc
+    print $ cc
+    -- print result
+    print $ compareResults (pc, cc)
