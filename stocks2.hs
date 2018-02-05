@@ -1,16 +1,20 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RecordWildCards #-}
 
 import Data.Aeson
+import Data.Aeson.Lens
+import Control.Lens
+import GHC.Generics
 import Data.ByteString.Lazy.Char8 (pack)
 import Network.HTTP.Conduit
 
 -- | Observation data
 data Observation =
-    Observation { compName          :: String  -- ^ The company's name
-                , latestP           :: Float   -- ^ Latest stock price
-                , latestT           :: String  -- ^ epoch timeframe
-                } deriving (Show)
+    Observation { company          :: String  -- ^ The company's name
+                , latestPrice      :: Float   -- ^ Latest stock price
+                , latestTime       :: String  -- ^ epoch timeframe
+                } deriving (Show, Generic)
 
 instance FromJSON Observation where
     parseJSON = withObject "Observation" $ \v -> Observation
@@ -19,15 +23,19 @@ instance FromJSON Observation where
         <*> v .: "latestTime"
 
 -- builds the URL
-conditionsQuery2 :: String -> String
-conditionsQuery2 company =
+conditionsQuery :: String -> String
+conditionsQuery company =
     "https://api.iextrading.com/1.0/stock/" ++ company ++ "/quote"
 
 
 main :: IO ()
 main = do
     print "What's the company name?"
-    company <- getLine
-    response <- simpleHttp (conditionsQuery2 company)
-    print $ (decode $ response :: Maybe Observation)
-    
+    comp <- getLine
+    response <- simpleHttp (conditionsQuery comp)
+    let r1 = decode response :: Maybe Observation
+    case r1 of 
+        Nothing                -> putStrLn "No data"
+        Just (Observation{..}) -> do
+            putStrLn $ "The latest stock price of " ++ company ++ " is " ++ show latestPrice
+            putStrLn $ "Recorded today at: " ++ latestTime
